@@ -9,19 +9,32 @@ A matching engine is a program that accepts orders from buyers and sellers. The 
 
 The matching (or trade allocation) algorithm is an important part of an exchange trading mechanism, since it is responsible for resolving the buy/sell association in a fast and efficient way.
 
-
-
-# First Iteration: "The Law and Order"
-
 Exchanges set the institutional rules that govern trading and information flows about that trading. They are closely linked to the clearing facilities through which post-trade activities could be completed. An exchange centralizes the communication of bid and offer prices to all direct market participants, who can respond by selling or buying at one of the quotes or by replying with a different quote.
+
+
+First Iteration: "The Law and Order"
+================================================================================
+
 
 The market exchange platform must allow broker to take order either buy or sell.
 All orders are created by brokers, are either to sell or to buy a given instrument, and have a known size and quantity.
 
 > A customer enters the quantity and prices of the orders and clicks “buy” or “sell”
 
-It then creates record with Pending order status.
+![Take Order](images/Order-controls.png)
 
+![My Order list](images/All-orders.png)
+
+
+* buy/bid
+* sell/offer
+
+
+Limit orders, in addition, define a limit price, and will not execute if market conditions are inferior to the limit price.
+The motivation of market makers to place limit orders is to “buy low and sell high”. Thus, a market maker would prefer as large spread between his bid and offer as possible.
+
+
+## Signatures hints
 
 ```java
 public enum Side {
@@ -37,17 +50,10 @@ public interface Broker {
 ```
 
 ```java
-public enum OrderStatus {
-  Pending
-}
-```
-
-```java
 public interface Order {
   Side side();
   Broker broker();
   double quantity();
-  OrderStatus status();
 }
 ```
 
@@ -56,51 +62,10 @@ public interface OrderId {
 }
 ```
 
-
 ```java
 public interface MarketExchange {
   OrderId takeOrder(Order order);
   Option<Order> findById(OrderId id);
-}
-```
-
-
-* buy/bid
-* sell/offer
-
-```gherkin
-Feature: Basic Order Processing
-
-  Scenario: Take a sell order
-
-    When broker "A" take a sell order of 150 YAMX for 10.5€
-    Then the market exchange should have created the following record:
-      | Broker | Side | Qty | Price | Status  |
-      | A      | Sell | 150 | 10.5  | Pending |
-```
-
-Any time an order is processed, it is required to re-verify order status to ensure that it is still pending/active.
-
-It is also required to be able to Validate the order funding.
-The broker must have sufficient assets to process the order. If not, the order is Suspended (it may be re-actived if funds become available later.)
-
-
-```java
-public interface OrderFundingValidation {
-  boolean validateOrderFunding(Order order);
-}
-```
-
-
-If order passes validation:
-
-1. the order status is changed to Active
-2. the assets needed to pay for the order are added to the Frozen balance. The prevents the broker from placing orders on more assets than he has. (**Note** This feature may be removed later – we can allow spending greater than the available balance if we check the balance before processing the transaction).
-
-```java
-public interface AssetInfo {
-  double available();
-  double frozenAmount();
 }
 ```
 
@@ -110,10 +75,20 @@ public interface LimitOrder extends Order {
 }
 ```
 
+## Gherkin hints
 
-Limit orders, in addition, define a limit price, and will not execute if market conditions are inferior to the limit price.
-The motivation of market makers to place limit orders is to “buy low and sell high”. Thus, a market maker would prefer as large spread between his bid and offer as possible.
+`01-order-acquisition.feature`
 
+```gherkin
+Feature: Basic Order Processing
+
+  Scenario: Take a sell order
+
+    When broker "A" take a sell order of 150 XBZ-01 for 10.5€
+    Then the market exchange should have created the following record:
+      | Broker | Side | Qty | Price |
+      | A      | Sell | 150 | 10.5  |
+```
 
 `00-standard/01-limit-order.feature`
 
@@ -154,11 +129,19 @@ Scenario: Standard sell limit order
 
 
 
-# Second Iteration: Order Book and timestamp
+Second Iteration: Order Book and timestamp
+================================================================================
+
 
 Then, there’s the order book, which keeps track of buyers’ and sellers’ interests. At every price level, this book records open 'buy' and 'sell' orders, including their cumulative sizes.
 
 When an order is entered into the order book, it is assigned a timestamp. This timestamp can be used to prioritize orders, when other criteria are identical, the order entered earliest gets executed first.
+
+## Questions?
+
+* one book for sell, one for buy?
+
+## Signatures hints
 
 ```java
 public interface BookEntry {
@@ -173,6 +156,9 @@ public interface OrderBook {
   Stream<BookEntry> entries();
 }
 ```
+
+
+## Gherkin hints
 
 ```gherkin
 @technical @orderBook @timestamp
@@ -193,7 +179,10 @@ Scenario: Timestamp are automatically assigned on order
     | D      | Sell | 9         |
 ```
 
-# Third Iteration: Price / Time Priority
+
+Third Iteration: Price / Time Priority
+================================================================================
+
 
 Often you’ll see order books displayed as tables showing open buy orders (known as 'bids') and sell orders (known as 'asks') at price levels below and above the last market price:
 
@@ -273,7 +262,9 @@ Scenario: Aggregated view of quantities per price - Sell order book
     |  50 | 10.5  |
 ```
 
-# Fourth iteration: When regulation comes in action!
+Fourth iteration: When regulation comes in action!
+================================================================================
+
 
 To satisfy regulation constraint, it is required that each order trigger a log event in the audit trail.
 
@@ -294,9 +285,60 @@ public interface AuditTrail {
 ```
 
 
-# Fifth iteration: Order expires!
+Fifth iteration: Order expires!
+================================================================================
+
+
+The market exchange platform must allow broker to take order either buy or sell.
+It then creates record with Pending order status.
+
+Any time an order is processed, it is required to re-verify order status to ensure that it is still pending/active.
+
+It is also required to be able to Validate the order funding.
+The broker must have sufficient assets to process the order. If not, the order is Suspended (it may be re-actived if funds become available later.)
+
+
+```java
+public enum OrderStatus {
+  Pending,
+  Active,
+  Cancelled,
+  Expired
+}
+```
+
+```java
+public interface OrderFundingValidation {
+  boolean validateOrderFunding(Order order);
+}
+```
+
+If order passes validation:
+
+1. the order status is changed to Active
+2. the assets needed to pay for the order are added to the Frozen balance. The prevents the broker from placing orders on more assets than he has. (**Note** This feature may be removed later – we can allow spending greater than the available balance if we check the balance before processing the transaction).
+
+```java
+public interface AssetInfo {
+  double available();
+  double frozenAmount();
+}
+```
 
 If expired, the order is Cancelled.
+
+## Gherkin hints
+
+```gherkin
+Feature: Order Processing
+
+  Scenario: Take a sell order
+
+    When broker "A" take a sell order of 150 XBZ-01 for 10.5€
+    Then the market exchange should have created the following record:
+      | Broker | Side | Qty | Price | Status  |
+      | A      | Sell | 150 | 10.5  | Pending |
+```
 
 ```gherkin
 Feature: Basic Order Processing
