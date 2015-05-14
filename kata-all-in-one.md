@@ -1,4 +1,4 @@
-# Introduction
+![](images/Yamex-header.png)
 
 Welcome to Yamex!
 
