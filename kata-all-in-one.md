@@ -192,6 +192,7 @@ For all products, the best bid and ask prices, as well as their respective aggre
 
 Furthermore, Order book must provide an aggregated view of the quantities for a given price.
 
+**buy, sell, bid, ask, offer...**!!
 
 ## Signatures hints
 
@@ -271,13 +272,73 @@ Scenario: Aggregated view of quantities per price - Sell order book
     | C      |  50 | 10.5  | Buy  |
     | D      | 200 | 10.7  | Buy  |
    Then the order book aggregated view - for the Buy orders - should looks like:
-    | Qty | Price |
-    | 350 | 10.7  |
-    | 100 | 10.6  |
-    |  50 | 10.5  |
+    | Cumulative Qty | Qty | Price |
+    |            350 | 350 | 10.7  |
+    |            450 | 100 | 10.6  |
+    |            500 |  50 | 10.5  |
 ```
 
-Fourth iteration: When regulation comes in action!
+```gherkin
+
+Scenario: Order book - standard view
+
+  Given an default order book initialized with the "Price / Time priority" strategy
+   When the following orders are added to the order book (in a random order):
+    | Broker | Qty | Price | Side |
+    | A1     | 100 | 10.9  | Buy  |
+    | A2     |  75 | 10.9  | Buy  |
+    | B      | 100 | 10.8  | Buy  |
+    | C1     |  50 | 10.7  | Buy  |
+    | C2     |  80 | 10.7  | Buy  |
+    | E1     | 150 | 11.1  | Sell |
+    | E2     |  50 | 11.1  | Sell |
+    | F      |  20 | 11.3  | Sell |
+  Then the standard view of the order book should look like:
+    | cumSize | bidSize | bidPrice | askPrice |  askSize | cumSize |
+    |    175  |    175  |    10.9  |    11.1  |    200   |   200   |
+    |    275  |    100  |    10.8  |    11.3  |     20   |   220   |
+    |    405  |    130  |    10.7  |          |          |         |
+
+```
+
+
+Fourth iteration: Matching Algorithm
+================================================================================
+
+The Order Matching Service tries to find a match to the buy or sell order. To find a match, we search all Active orders which match the specified price.
+
+* If the order is a buy, we look for a price less than or equal.
+* If the order is a sell, we look for a price greater than or equal.
+* If it’s a market order, we find the highest (sell) or lowest (buy) price.
+
+We sort the matches ascending for buy orders, and descending for sell orders. Then we sort by date if the price matches.
+
+
+## Signature hints
+
+
+```java
+public interface Specification<T> {
+  boolean isSatisfiedBy(T value);
+}
+```
+
+```java
+public interface QueryMatcher {
+  Specification<BookEntry> matcherFor(double price);
+}
+```
+
+
+## Gherkin hints
+
+
+Fifth iteration: Market Order
+================================================================================
+
+
+
+Optional iteration 1: When regulation comes in action!
 ================================================================================
 
 
@@ -303,7 +364,7 @@ public interface AuditTrail {
 ```
 
 
-Fifth iteration: Order expires!
+Optional iteration 2: Order expires!
 ================================================================================
 
 
@@ -382,7 +443,10 @@ Feature: Basic Order Processing
       | A      | Sell | 150 | 10.5  | Expired |
 ```
 
-# Matching Principles
+
+Matching Principles
+================================================================================
+
 
 When orders and quotes are entered into the central order book, they are sorted by type, price and entry time. Market orders are always given the highest priority for matching purposes. Limit orders and quotes are sorted together; there is no special consideration given to Market Maker quotes.
 
