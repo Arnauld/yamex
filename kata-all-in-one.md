@@ -186,15 +186,31 @@ Third Iteration: Price / Time Priority
 
 Often you’ll see order books displayed as tables showing open buy orders (known as 'bids') and sell orders (known as 'asks') at price levels below and above the last market price:
 
-![Order Book](images/order-book-pic-1.jpg)
+![Order Book](images/Order-book.png)
 
 For all products, the best bid and ask prices, as well as their respective aggregated bid and offer sizes (also known as the inside market), are always available in real time.
 
+Furthermore, Order book must provide an aggregated view of the quantities for a given price.
+
+
+## Signatures hints
+
+```java
+public interface PriorityStrategy {
+  Comparator<? extends BookEntry> sorter();
+}
+```
+
 ```java
 public interface OrderBook {
+  PriorityStrategy priorityStrategy();
   Option<BookEntry> topEntry(Side side);
 }
 ```
+
+## Gherkin hints
+
+`02-orderBook.feature`
 
 ```gherkin
 
@@ -235,7 +251,6 @@ Scenario: Price / Time Priority for Limit order - Buy by descending price order
 
 ```
 
-Furthermore, Order book provides an aggregated view of the quantities for a given price.
 
 ```gherkin
 Scenario: Unless specified an order book is initialized with the "Price / Time priority" strategy
@@ -266,7 +281,10 @@ Fourth iteration: When regulation comes in action!
 ================================================================================
 
 
-To satisfy regulation constraint, it is required that each order trigger a log event in the audit trail.
+To satisfy regulation constraint, it is required that each order creation, update or execution, triggers a log event in the audit trail.
+
+
+## Signature hints
 
 ```java
 public interface EventType {
@@ -298,6 +316,17 @@ It is also required to be able to Validate the order funding.
 The broker must have sufficient assets to process the order. If not, the order is Suspended (it may be re-actived if funds become available later.)
 
 
+If order passes validation:
+
+1. the order status is changed to Active
+2. the assets needed to pay for the order are added to the Frozen balance. The prevents the broker from placing orders on more assets than he has. (**Note** This feature may be removed later – we can allow spending greater than the available balance if we check the balance before processing the transaction).
+
+
+If expired, the order is Cancelled.
+
+
+## Signature hints
+
 ```java
 public enum OrderStatus {
   Pending,
@@ -313,19 +342,12 @@ public interface OrderFundingValidation {
 }
 ```
 
-If order passes validation:
-
-1. the order status is changed to Active
-2. the assets needed to pay for the order are added to the Frozen balance. The prevents the broker from placing orders on more assets than he has. (**Note** This feature may be removed later – we can allow spending greater than the available balance if we check the balance before processing the transaction).
-
 ```java
 public interface AssetInfo {
   double available();
   double frozenAmount();
 }
 ```
-
-If expired, the order is Cancelled.
 
 ## Gherkin hints
 
