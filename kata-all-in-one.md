@@ -363,6 +363,26 @@ public interface AuditTrail {
 }
 ```
 
+Example of audit trail:
+
+```
+SellPlaced        - Order#204    - Pending   - Broker A - Sell 230 @ 10.3 / no expiration
+StatusChanged     - Order#204    - Active
+SellPlaced        - Order#205    - Pending   - Broker B - Sell 130 @ 10.2 / no expiration
+StatusChanged     - Order#205    - Suspended - Not enough fund
+BuyPlaced         - Order#206    - Pending   - Broker C - Buy   70 @ 11.2 / no expiration
+StatusChanged     - Order#204    - Active
+OrderCancelled    - Order#152    - Cancelled
+StatusChanged     - Order#204    - Finished
+QuantityDecreased - Order#120    - 50
+StatusChanged     - Order#120    - Finished
+QuantityDecreased - Order#135    - 20
+OrderExecuted     - Execution#12 - From: Order#120 50, Order#135 20 - To: Order#206
+StatusChanged     - Order#206    - Finished
+OrderExpired      - Order#117    -
+StatusChanged     - Order#117    - Expired
+...
+```
 
 Optional iteration 2: Order expires!
 ================================================================================
