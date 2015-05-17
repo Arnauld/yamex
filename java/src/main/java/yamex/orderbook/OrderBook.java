@@ -4,6 +4,7 @@ import yamex.ExecutionBus;
 import yamex.Order;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,9 +36,21 @@ public class OrderBook {
     }
 
     private void resolveMatching(Record record) {
+
+        Comparator<Record> priceComparator = Record.priceComparator();//
+        Comparator<Record> sequenceComparator = Record.sequenceComparator();
+
+        Comparator<Record> comparator = (r1, r2) -> {
+            int ord = priceComparator.compare(r1, r2);
+            if (ord == 0)
+                return sequenceComparator.compare(r1, r2);
+            else
+                return -ord; // reverse order
+        };
+
         records()
                 .filter(r -> r.way() != record.way() && r.priceCrosses(record))
-                .sorted(Record.sequenceComparator())
+                .sorted(comparator)
                 .forEach(r -> record.processExecutionIfPossible(executionBus, r));
 
         records = records()

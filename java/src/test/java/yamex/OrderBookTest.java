@@ -125,6 +125,23 @@ public class OrderBookTest {
         assertThat(executions).contains(new Execution(sell.orderId(), buy.orderId(), quantity(5)));
     }
 
+    @Test
+    public void orderBook_should_trigger_an_execution_on_matching_and_decrease_qty_accordingly__buy_higher_price_first__then_sequence() {
+        Order buy1 = orderSamples.buy(10, 12.4);
+        Order buy2 = orderSamples.buy(5, 13.4);
+        Order buy3 = orderSamples.buy(5, 13.4);
+        Order sell = orderSamples.sell(7, 11.4);
+
+        book.takeOrder(buy1);
+        book.takeOrder(buy2);
+        book.takeOrder(buy3);
+        book.takeOrder(sell);
+
+        assertThat(executions).contains(
+                new Execution(sell.orderId(), buy2.orderId(), quantity(5)),
+                new Execution(sell.orderId(), buy3.orderId(), quantity(2)));
+    }
+
     private static List<T> extract(OrderBook book, Order.Way way) {
         return book.records()
                 .filter(r -> r.way() == way)
