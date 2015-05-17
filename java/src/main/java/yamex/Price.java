@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
-public class Price {
+public class Price implements Comparable<Price> {
 
     public static Price price(double amount) {
         return price(BigDecimal.valueOf(amount));
@@ -48,5 +48,10 @@ public class Price {
     @Override
     public String toString() {
         return "Price{" + amount + '}';
+    }
+
+    @Override
+    public int compareTo(Price price) {
+        return amount.compareTo(price.amount);
     }
 }
