@@ -39,4 +39,9 @@ public class Quantity {
     public int hashCode() {
         return amount;
     }
+
+    @Override
+    public String toString() {
+        return "Quantity{" + amount + '}';
+    }
 }
