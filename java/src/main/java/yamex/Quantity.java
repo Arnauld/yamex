@@ -9,6 +9,13 @@ public class Quantity {
         return new Quantity(amount);
     }
 
+    public static Quantity min(Quantity q1, Quantity q2) {
+        if (q1.amount() > q2.amount())
+            return q2;
+        else
+            return q1;
+    }
+
     private final int amount;
 
     public Quantity(int amount) {
@@ -23,6 +30,10 @@ public class Quantity {
         return quantity(amount - other.amount);
     }
 
+    public boolean isPositive() {
+        return amount > 0;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -32,7 +43,6 @@ public class Quantity {
 
         Quantity quantity = (Quantity) o;
         return amount == quantity.amount;
-
     }
 
     @Override
@@ -44,4 +54,5 @@ public class Quantity {
     public String toString() {
         return "Quantity{" + amount + '}';
     }
+
 }

@@ -1,4 +1,4 @@
-package yamex;
+package yamex.util;
 
 import java.util.Arrays;
 

@@ -1,4 +1,7 @@
-package yamex;
+package yamex.orderbook;
+
+import yamex.ExecutionBus;
+import yamex.Order;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static yamex.Order.Way.Buy;
 import static yamex.Order.Way.Sell;
 import static yamex.util.MyCollectors.maxList;
@@ -17,10 +21,28 @@ import static yamex.util.MyCollectors.minList;
 public class OrderBook {
 
     private final AtomicLong recordIdGen = new AtomicLong();
+    private final ExecutionBus executionBus;
     private List<Record> records = new ArrayList<>();
 
+    public OrderBook(ExecutionBus executionBus) {
+        this.executionBus = executionBus;
+    }
+
     public void takeOrder(Order order) {
-        records.add(newRecord(order));
+        Record r = newRecord(order);
+        records.add(r);
+        resolveMatching(r);
+    }
+
+    private void resolveMatching(Record record) {
+        records()
+                .filter(r -> r.way() != record.way() && r.priceCrosses(record))
+                .sorted(Record.sequenceComparator())
+                .forEach(r -> record.processExecutionIfPossible(executionBus, r));
+
+        records = records()
+                .filter(Record::hasRemaining)
+                .collect(toList());
     }
 
     protected Record newRecord(Order order) {
