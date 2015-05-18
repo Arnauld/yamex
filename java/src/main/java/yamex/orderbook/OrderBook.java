@@ -40,22 +40,28 @@ public class OrderBook {
 
     private void resolveMatching(Record record) {
 
-        Comparator<Record> priceComparator = Record.priceComparator();//
+        records()
+                .filter(r -> r.way() != record.way() && r.priceCrosses(record))
+                .sorted(priceThenSequenceComparator())
+                .forEach(r -> record.processExecutionIfPossible(executionBus, r));
+
+        removeEmptyRecords();
+    }
+
+    private static Comparator<Record> priceThenSequenceComparator() {
+        Comparator<Record> priceComparator = Record.priceComparator();
         Comparator<Record> sequenceComparator = Record.sequenceComparator();
 
-        Comparator<Record> comparator = (r1, r2) -> {
+        return (r1, r2) -> {
             int ord = priceComparator.compare(r1, r2);
             if (ord == 0)
                 return sequenceComparator.compare(r1, r2);
             else
                 return -ord; // reverse order
         };
+    }
 
-        records()
-                .filter(r -> r.way() != record.way() && r.priceCrosses(record))
-                .sorted(comparator)
-                .forEach(r -> record.processExecutionIfPossible(executionBus, r));
-
+    private void removeEmptyRecords() {
         records = records()
                 .filter(Record::hasRemaining)
                 .collect(toList());
