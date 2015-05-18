@@ -24,6 +24,29 @@ public class QuantityTest {
         Quantity q27 = quantity(27);
         Quantity q15 = quantity(15);
         Quantity q12 = quantity(12);
-        assertThat(q27.decreasedBy(q15)).isEqualTo(q12);
+        assertThat(q27.decreasedBy(q15))
+                .isNotSameAs(q27)
+                .isNotSameAs(q15)
+                .isEqualTo(q12);
+    }
+
+    @Test
+    public void quantity_add_should_provide_a_new_instance() {
+        Quantity q27 = quantity(27);
+        Quantity q15 = quantity(15);
+        Quantity q12 = quantity(12);
+        assertThat(q12.add(q15))
+                .isNotSameAs(q12)
+                .isNotSameAs(q15)
+                .isEqualTo(q27);
+    }
+
+
+    @Test
+    public void quantity_should_indicate_whether_positive_or_not() {
+        assertThat(quantity(27).isPositive()).isTrue();
+        assertThat(quantity(1).isPositive()).isTrue();
+        assertThat(quantity(0).isPositive()).isFalse();
+        assertThat(quantity(-1).isPositive()).isFalse();
     }
 }

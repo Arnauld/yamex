@@ -30,6 +30,10 @@ public class Quantity {
         return quantity(amount - other.amount);
     }
 
+    public Quantity add(Quantity other) {
+        return quantity(amount + other.amount);
+    }
+
     public boolean isPositive() {
         return amount > 0;
     }

@@ -54,4 +54,8 @@ public class Price implements Comparable<Price> {
     public int compareTo(Price price) {
         return amount.compareTo(price.amount);
     }
+
+    public boolean lowerOrEqualsThan(Price other) {
+        return amount.compareTo(other.amount) <= 0;
+    }
 }

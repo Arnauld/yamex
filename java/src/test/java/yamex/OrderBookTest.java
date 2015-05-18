@@ -21,13 +21,12 @@ import static yamex.util.T.t;
 public class OrderBookTest {
 
     private OrderSamples orderSamples = new OrderSamples();
-    private ExecutionBus executionBus;
     private List<Execution> executions = new ArrayList<>();
     private OrderBook book;
 
     @Before
     public void setUp() {
-        executionBus = executions::add;
+        ExecutionBus executionBus = executions::add;
         book = new OrderBook(executionBus);
     }
 
@@ -140,6 +139,35 @@ public class OrderBookTest {
         assertThat(executions).contains(
                 new Execution(sell.orderId(), buy2.orderId(), quantity(5)),
                 new Execution(sell.orderId(), buy3.orderId(), quantity(2)));
+    }
+
+    @Test
+    public void orderBook_should_provides_an_accumulated_view_of_quantity_available_for_buy_below_the_specified_price() {
+        assertThat(book.availableForBuyAt(price(11.8))).isEqualTo(Optional.<Quantity>empty());
+
+        book.takeOrder(orderSamples.buy(10, 12.4));
+        book.takeOrder(orderSamples.buy(10, 12.2));
+        book.takeOrder(orderSamples.buy(15, 12.4));
+        book.takeOrder(orderSamples.buy(10, 12.7));
+
+        assertThat(book.availableForBuyAt(price(12.7))).isEqualTo(Optional.of(quantity(45)));
+        assertThat(book.availableForBuyAt(price(12.4))).isEqualTo(Optional.of(quantity(35)));
+        assertThat(book.availableForBuyAt(price(11.8))).isEqualTo(Optional.<Quantity>empty());
+    }
+
+
+    @Test
+    public void orderBook_should_provides_an_accumulated_view_of_quantity_available_for_sell_below_the_specified_price() {
+        assertThat(book.availableForSellAt(price(11.8))).isEqualTo(Optional.<Quantity>empty());
+
+        book.takeOrder(orderSamples.sell(10, 12.4));
+        book.takeOrder(orderSamples.sell(10, 12.2));
+        book.takeOrder(orderSamples.sell(15, 12.4));
+        book.takeOrder(orderSamples.sell(10, 12.7));
+
+        assertThat(book.availableForSellAt(price(12.7))).isEqualTo(Optional.of(quantity(45)));
+        assertThat(book.availableForSellAt(price(12.4))).isEqualTo(Optional.of(quantity(35)));
+        assertThat(book.availableForSellAt(price(11.8))).isEqualTo(Optional.<Quantity>empty());
     }
 
     private static List<T> extract(OrderBook book, Order.Way way) {

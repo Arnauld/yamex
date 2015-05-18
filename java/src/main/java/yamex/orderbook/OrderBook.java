@@ -2,6 +2,8 @@ package yamex.orderbook;
 
 import yamex.ExecutionBus;
 import yamex.Order;
+import yamex.Price;
+import yamex.Quantity;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,6 +36,7 @@ public class OrderBook {
         records.add(r);
         resolveMatching(r);
     }
+
 
     private void resolveMatching(Record record) {
 
@@ -86,5 +89,21 @@ public class OrderBook {
                 .stream()
                 .sorted(Record.sequenceComparator())
                 .findFirst();
+    }
+
+    public Optional<Quantity> availableForBuyAt(Price price) {
+        return records()
+                .filter(r -> r.way() == Buy)
+                .filter(r -> r.price().lowerOrEqualsThan(price))
+                .map(Record::remainingQuantity)
+                .reduce(Quantity::add);
+    }
+
+    public Optional<Quantity> availableForSellAt(Price price) {
+        return records()
+                .filter(r -> r.way() == Sell)
+                .filter(r -> r.price().lowerOrEqualsThan(price))
+                .map(Record::remainingQuantity)
+                .reduce(Quantity::add);
     }
 }
