@@ -23,7 +23,7 @@ public class OrderSteps {
         orderBook = new OrderBook();
     }
 
-    @When("^a buy limit order is passed for (\\d+) (.+) at (.+)€$")
+    @When("^a (?:buy|sell) limit order is passed for (\\d+) (.+) at (.+)€$")
     public void passBuyLimitOrder(int qty, String instrument, BigDecimal priceLimit) throws Throwable {
         currentOrder = new LimitOrder(instrument, qty, priceLimit);
         currentOrderId = orderBook.passOrder(currentOrder);
