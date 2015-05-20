@@ -17,7 +17,8 @@ Feature: Limit Order
 
     Given an empty order book
     And the following order have been passed:
-      | instrument | order type  | way | qty | price |
-      | FFLY       | Limit Order | Buy | 150 | 10.4  |
-      | FFLY       | Limit Order | Buy | 15  | 11.9  |
+      | instrument | order type  | way  | qty | price |
+      | FFLY       | Limit Order | Buy  | 150 | 10.4  |
+      | FFLY       | Limit Order | Buy  | 15  | 11.9  |
+      | FFLY       | Limit Order | Sell | 15  | 12.9  |
     Then the order book's best bid price should be 11.9€

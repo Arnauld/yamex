@@ -38,17 +38,28 @@ public class OrderSteps {
         public BigDecimal price;
 
         public void passOrder(OrderBook book) {
+            Way w = parseWay(way);
+
             if (orderType.replaceAll("\\s+", "").equalsIgnoreCase("limitorder")) {
-                book.passOrder(new LimitOrder(instrument, qty, price));
+                book.passOrder(new LimitOrder(instrument, w, qty, price));
             } else {
                 Assertions.fail("Unsupported order type: " + orderType);
             }
         }
     }
 
-    @When("^a (?:buy|sell) limit order is passed for (\\d+) (.+) at (.+)€$")
-    public void passBuyLimitOrder(int qty, String instrument, BigDecimal priceLimit) throws Throwable {
-        currentOrder = new LimitOrder(instrument, qty, priceLimit);
+    private static Way parseWay(String way) {
+        if (way == null || way.equalsIgnoreCase("buy"))
+            return Way.Buy;
+        else if (way.equalsIgnoreCase("sell"))
+            return Way.Sell;
+        Assertions.fail("Unsupported way: " + way);
+        return null;
+    }
+
+    @When("^a (buy|sell) limit order is passed for (\\d+) (.+) at (.+)€$")
+    public void passBuyLimitOrder(String way, int qty, String instrument, BigDecimal priceLimit) throws Throwable {
+        currentOrder = new LimitOrder(instrument, parseWay(way), qty, priceLimit);
         currentOrderId = orderBook.passOrder(currentOrder);
     }
 

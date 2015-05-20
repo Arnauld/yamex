@@ -27,7 +27,8 @@ public class OrderBook {
 
     public Optional<BigDecimal> bestBidPrice() {
         return records()
-                .max((r1,r2) -> r1.price().compareTo(r2.price()))
+                .filter(r -> r.way() == Way.Buy)
+                .max((r1, r2) -> r1.price().compareTo(r2.price()))
                 .map(Record::price);
     }
 
@@ -46,6 +47,10 @@ public class OrderBook {
 
         public LimitOrder order() {
             return order;
+        }
+
+        public Way way() {
+            return order.way();
         }
 
         public BigDecimal price() {
