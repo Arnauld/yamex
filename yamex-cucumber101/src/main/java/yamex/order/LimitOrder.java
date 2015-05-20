@@ -15,4 +15,23 @@ public class LimitOrder {
         this.qty = qty;
         this.priceLimit = priceLimit;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LimitOrder that = (LimitOrder) o;
+        return qty == that.qty
+                && instrument.equals(that.instrument)
+                && priceLimit.equals(that.priceLimit);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = instrument.hashCode();
+        result = 31 * result + qty;
+        result = 31 * result + priceLimit.hashCode();
+        return result;
+    }
 }
