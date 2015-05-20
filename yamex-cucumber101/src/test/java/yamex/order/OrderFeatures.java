@@ -8,6 +8,6 @@ import org.junit.runner.RunWith;
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(monochrome = true)
+@CucumberOptions(strict = true, tags = {"~@wip"})
 public class OrderFeatures {
 }

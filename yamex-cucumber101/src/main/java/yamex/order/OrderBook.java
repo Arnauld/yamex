@@ -1,7 +1,9 @@
 package yamex.order;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -23,6 +25,12 @@ public class OrderBook {
         return records.stream();
     }
 
+    public Optional<BigDecimal> bestBidPrice() {
+        return records()
+                .max((r1,r2) -> r1.price().compareTo(r2.price()))
+                .map(Record::price);
+    }
+
     public static class Record {
         private final long id;
         private final LimitOrder order;
@@ -38,6 +46,10 @@ public class OrderBook {
 
         public LimitOrder order() {
             return order;
+        }
+
+        public BigDecimal price() {
+            return order.getPriceLimit();
         }
     }
 }

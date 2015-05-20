@@ -16,6 +16,10 @@ public class LimitOrder {
         this.priceLimit = priceLimit;
     }
 
+    public BigDecimal getPriceLimit() {
+        return priceLimit;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

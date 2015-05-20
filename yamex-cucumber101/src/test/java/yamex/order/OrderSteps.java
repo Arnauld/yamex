@@ -3,8 +3,10 @@ package yamex.order;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.assertj.core.api.Assertions;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +25,27 @@ public class OrderSteps {
         orderBook = new OrderBook();
     }
 
+    @Given("^the following order have been passed:$")
+    public void passOrders(List<OrderRow> rows) throws Throwable {
+        rows.forEach(r -> r.passOrder(orderBook));
+    }
+
+    public static class OrderRow {
+        public String instrument;
+        public String orderType = "limitorder";
+        public String way;
+        public int qty;
+        public BigDecimal price;
+
+        public void passOrder(OrderBook book) {
+            if (orderType.replaceAll("\\s+", "").equalsIgnoreCase("limitorder")) {
+                book.passOrder(new LimitOrder(instrument, qty, price));
+            } else {
+                Assertions.fail("Unsupported order type: " + orderType);
+            }
+        }
+    }
+
     @When("^a (?:buy|sell) limit order is passed for (\\d+) (.+) at (.+)€$")
     public void passBuyLimitOrder(int qty, String instrument, BigDecimal priceLimit) throws Throwable {
         currentOrder = new LimitOrder(instrument, qty, priceLimit);
@@ -35,6 +58,11 @@ public class OrderSteps {
                 .records()
                 .filter(r -> r.id() == currentOrderId && r.order().equals(currentOrder))
                 .findFirst()).isNotEqualTo(Optional.empty());
+    }
+
+    @Then("^the order book's best bid price should be (.+)€$")
+    public void the_order_book_s_best_bid_price_should_be_€(BigDecimal expectedPrice) throws Throwable {
+        assertThat(orderBook.bestBidPrice()).isEqualTo(Optional.of(expectedPrice));
     }
 
 }
