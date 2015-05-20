@@ -19,7 +19,7 @@ This specification describes the matching engine expected behaviors.
 * **Bid** - the price in a buy order
 * **Ask** - the price in a sell order
 * **Spread** - the difference between the bid and the ask
-* **Time In Force** -
+* **Time In Force** - indicates how long an order will remain active
 
 # Order Types
 
@@ -90,8 +90,6 @@ Market orders cannot be canceled because their execution will take place immedia
 # Time In Force
 
 A special instruction used when placing a trade to indicate how long an order will remain active before it is executed or expires. Time-in-force options allow traders to be more specific about the time parameters in which an order is activated.
-
-## Time in Force
 
 * **Day Order**: Day Orders are valid until the end of current day (midnight). If order is not executed until this time, then it is cancelled
 * **Fill or Kill (FoK)**: FoK Orders are executed always with their full volume. If full volume cannot be executed due to insufficient liquidity then order is cancelled.
