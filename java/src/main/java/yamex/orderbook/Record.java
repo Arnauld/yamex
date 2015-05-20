@@ -88,4 +88,13 @@ public class Record {
                 throw new IllegalStateException("Unknown way: " + way());
         }
     }
+
+    @Override
+    public String toString() {
+        return "Record{" +
+                "sequence=" + sequence +
+                ", order=" + order +
+                ", remainingQty=" + remainingQty +
+                '}';
+    }
 }

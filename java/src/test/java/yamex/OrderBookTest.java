@@ -3,12 +3,16 @@ package yamex;
 import org.junit.Before;
 import org.junit.Test;
 import yamex.orderbook.OrderBook;
+import yamex.orderbook.OrderBookListener;
 import yamex.orderbook.Record;
 import yamex.util.T;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -168,6 +172,43 @@ public class OrderBookTest {
         assertThat(book.availableForSellAt(price(12.7))).isEqualTo(Optional.of(quantity(45)));
         assertThat(book.availableForSellAt(price(12.4))).isEqualTo(Optional.of(quantity(35)));
         assertThat(book.availableForSellAt(price(11.8))).isEqualTo(Optional.<Quantity>empty());
+    }
+
+    @Test
+    public void orderBook_should_notify_listener() {
+        book.setListener(new OrderBookListener() {
+            @Override
+            public void onOrderPlaced(Record record) {
+                System.out.println("OrderBookTest.onOrderPlaced::" + record);
+            }
+
+            @Override
+            public void onOrderConsumed(Record record) {
+                System.out.println("OrderBookTest.onOrderConsumed::" + record);
+            }
+
+            @Override
+            public void onExecution(Execution execution) {
+                System.out.println("OrderBookTest.onExecution::" + execution);
+            }
+        });
+
+        Random r = new Random(42);
+        List<BigDecimal> prices = new ArrayList<>();
+        for(int i=0;i<15;i++)
+            prices.add(BigDecimal.valueOf(r.nextInt(15), 1));
+
+        for(int i=0;i<150;i++) {
+            BigDecimal price = prices.get(r.nextInt(prices.size()));
+            int qty = 5 + r.nextInt(15);
+            Order.Way way;
+            if(r.nextBoolean())
+                way = Order.Way.Sell;
+            else
+                way = Order.Way.Buy;
+
+            book.takeOrder(orderSamples.order(way, qty, price));
+        }
     }
 
     private static List<T> extract(OrderBook book, Order.Way way) {

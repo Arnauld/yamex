@@ -43,4 +43,15 @@ public class Order {
     public Price price() {
         return price;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderId=" + orderId +
+                ", brokerId=" + brokerId +
+                ", way=" + way +
+                ", qty=" + qty +
+                ", price=" + price +
+                '}';
+    }
 }

@@ -1,5 +1,6 @@
 package yamex.orderbook;
 
+import yamex.Execution;
 import yamex.ExecutionBus;
 import yamex.Order;
 import yamex.Price;
@@ -8,11 +9,12 @@ import yamex.Quantity;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static yamex.Order.Way.Buy;
 import static yamex.Order.Way.Sell;
 import static yamex.util.MyCollectors.maxList;
@@ -26,27 +28,46 @@ public class OrderBook {
     private final AtomicLong recordIdGen = new AtomicLong();
     private final ExecutionBus executionBus;
     private List<Record> records = new ArrayList<>();
+    private OrderBookListener listener = OrderBookListener.NULL_LISTENER;
 
     public OrderBook(ExecutionBus executionBus) {
         this.executionBus = executionBus;
     }
 
+    public void setListener(OrderBookListener listener) {
+        this.listener = listener;
+    }
+
     public void takeOrder(Order order) {
         Record r = newRecord(order);
+
+        triggerOrderPlaced(r);
         records.add(r);
         resolveMatching(r);
     }
 
+    private void triggerOrderPlaced(Record record) {
+        listener.onOrderPlaced(record);
+    }
+
+    private void triggerOrderConsumed(List<Record> records) {
+        records.stream().forEach(listener::onOrderConsumed);
+    }
+
+    private void triggerExecution(Execution execution) {
+        listener.onExecution(execution);
+        executionBus.triggerExecution(execution);
+    }
 
     private void resolveMatching(Record record) {
-
         records()
                 .filter(r -> r.way() != record.way() && r.priceCrosses(record))
                 .sorted(priceThenSequenceComparator())
-                .forEach(r -> record.processExecutionIfPossible(executionBus, r));
+                .forEach(r -> record.processExecutionIfPossible(this::triggerExecution, r));
 
         removeEmptyRecords();
     }
+
 
     private static Comparator<Record> priceThenSequenceComparator() {
         Comparator<Record> priceComparator = Record.priceComparator();
@@ -62,9 +83,19 @@ public class OrderBook {
     }
 
     private void removeEmptyRecords() {
-        records = records()
-                .filter(Record::hasRemaining)
-                .collect(toList());
+        Map<Boolean, List<Record>> collect = records()
+                .collect(Collectors.partitioningBy(Record::hasRemaining));
+
+        triggerOrderConsumed(collect.get(Boolean.FALSE));
+        records = notNull(collect.get(Boolean.TRUE));
+    }
+
+
+    private List<Record> notNull(List<Record> records) {
+        if (records == null)
+            return new ArrayList<>();
+        else
+            return records;
     }
 
     protected Record newRecord(Order order) {

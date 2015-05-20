@@ -1,5 +1,6 @@
 package yamex;
 
+import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static yamex.BrokerId.brokerId;
@@ -51,6 +52,15 @@ public class OrderSamples {
     }
 
     public Order order(Order.Way way, int qty, double price) {
+        return new Order(
+                orderId(nextOrderId()),
+                brokerId(nextBrokerId()),
+                way,
+                quantity(qty),
+                price(price));
+    }
+
+    public Order order(Order.Way way, int qty, BigDecimal price) {
         return new Order(
                 orderId(nextOrderId()),
                 brokerId(nextBrokerId()),
