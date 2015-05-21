@@ -15,7 +15,7 @@ public class OrderBook {
     private final AtomicLong idGen = new AtomicLong();
     private final List<Record> records = new ArrayList<>();
 
-    public long passOrder(LimitOrder limitOrder) {
+    public long placeOrder(LimitOrder limitOrder) {
         long nextId = idGen.incrementAndGet();
         records.add(new Record(nextId, limitOrder));
         return nextId;

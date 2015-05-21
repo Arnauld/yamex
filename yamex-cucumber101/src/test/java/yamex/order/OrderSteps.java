@@ -25,42 +25,35 @@ public class OrderSteps {
         orderBook = new OrderBook();
     }
 
-    @Given("^the following order have been passed:$")
-    public void passOrders(List<OrderRow> rows) throws Throwable {
-        rows.forEach(r -> r.passOrder(orderBook));
+    @Given("^the following order have been placed:$")
+    public void placeOrders(List<OrderRow> rows) throws Throwable {
+        rows.forEach(r -> r.placeOrder(orderBook));
     }
 
     public static class OrderRow {
         public String instrument;
-        public String orderType = "limitorder";
+        public String orderType = "limit-order";
         public String way;
         public int qty;
         public BigDecimal price;
 
-        public void passOrder(OrderBook book) {
-            Way w = parseWay(way);
+        public void placeOrder(OrderBook book) {
+            Way w = OrderConverters.parseWay(way);
 
-            if (orderType.replaceAll("\\s+", "").equalsIgnoreCase("limitorder")) {
-                book.passOrder(new LimitOrder(instrument, w, qty, price));
-            } else {
-                Assertions.fail("Unsupported order type: " + orderType);
+            switch (OrderConverters.parseOrderType(orderType)) {
+                case LimitOrder:
+                    book.placeOrder(new LimitOrder(instrument, w, qty, price));
+                    break;
+                default:
+                    Assertions.fail("Unsupported order type: " + orderType);
             }
         }
     }
 
-    private static Way parseWay(String way) {
-        if (way == null || way.equalsIgnoreCase("buy"))
-            return Way.Buy;
-        else if (way.equalsIgnoreCase("sell"))
-            return Way.Sell;
-        Assertions.fail("Unsupported way: " + way);
-        return null;
-    }
-
-    @When("^a (buy|sell) limit order is passed for (\\d+) (.+) at (.+)€$")
+    @When("^a (buy|sell) limit order is placed for (\\d+) (.+) at (.+)€$")
     public void passBuyLimitOrder(String way, int qty, String instrument, BigDecimal priceLimit) throws Throwable {
-        currentOrder = new LimitOrder(instrument, parseWay(way), qty, priceLimit);
-        currentOrderId = orderBook.passOrder(currentOrder);
+        currentOrder = new LimitOrder(instrument, OrderConverters.parseWay(way), qty, priceLimit);
+        currentOrderId = orderBook.placeOrder(currentOrder);
     }
 
     @Then("^the order book should be updated with this new order$")
