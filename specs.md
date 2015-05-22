@@ -19,7 +19,7 @@ This specification describes the matching engine expected behaviors.
 * **Bid** - the price in a buy order
 * **Ask** - the price in a sell order
 * **Spread** - the difference between the bid and the ask
-* **Time In Force** - indicates how long an order will remain active
+* **Time In Force** - indicates how long an order will remain active (see Appendix B)
 
 # Order Types
 
@@ -31,53 +31,7 @@ In order to simplify the model, Yamex will only - at first - support the followi
 * Market Order
 * Stop Order
 
-## Limit Order
-
-A limit order is an order to buy or sell a contract at a specific price or better.
-A **buy** limit order can only be executed at the **limit price or lower**, and a **sell** limit order can only be executed at the **limit price or higher**.
-Use of a Limit order helps ensure that the customer will not receive an execution at a price less favorable than the limit price. Use of a Limit order, however, does not guarantee an execution.
-
-* A buy limit order for AAPL at $125 will buy shares of IBM at $125 or less.
-* A sell limit order for AAPL at $125 will sell shares of IBM for $125 or more.
-* A limit order must have a Time in Force (TIF) value
-
-In our system we support Limit Orders with various time in force parameters. Fill-or-Kill (FoK), Immediate-or-Cancel (IoC) works the same way as for Market Orders. Good-Till Date or Good-Till-Cancel and Day Orders are valid until specified time requested by investor and cancelled after that.
-
-### Iceberg Order
-
-
-An iceberg order is a type of order placed on a exchange. The total amount of the order is divided into a visible portion, which is reported to other market participants, and a hidden portion, which is not. When the visible part of the order is fulfilled, a new part of the hidden portion of the same size becomes visible.
-
-In our system only limit orders can be placed with Iceberg parameter.
-
-Iceberg orders generally specify an additional "display quantity"—i.e., smaller than the overall order quantity, leaving a large undisplayed quantity "below the surface"
-
-
-## Market Order
-
-A market order is an order to buy or sell a contract at the best available price.  Generally, this type of order will be executed immediately.  However, the price at which a market order will be executed is not guaranteed.  It is important for traders to remember that the last-traded price is not necessarily the price at which a market order will be executed.  In fast-moving markets, the price at which a market order will execute often deviates from the last-traded price or “real time” quote.
-
-Market Orders can have Fill-or-Kill (FoK) and Immediate or Cancel (IoC) parameters. The first one means that orders either will be filled completely or cancelled in case of insufficient liquidity. IoC order by contrast will be filled up to the existing level of liquidity and the resting part will be cancelled.
-
-## Stop Order
-
-A stop order, also referred to as a stop-loss order, is an order to buy or sell a stock once the price of the stock reaches a specified price, known as the stop price. When the stop price is reached, a stop order becomes a market order. A Stop order is not guaranteed a specific execution price and may execute significantly away from its stop price.
-
-A buy stop order is entered at a stop price above the current market price.  Investors generally use a buy stop order to limit a loss or to protect a profit on a stock that they have sold short.  
-A sell stop order is entered at a stop price below the current market price. Investors generally use a sell stop order to limit a loss or to protect a profit on a stock that they own.
-
-> You have purchased 100 shares of XYZ for $50.00/share.
-> You want to limit possible loss on this stock, so you create a stop order to sell 100 shares of XYZ with the stop price set to $46.00. If the price of your stock falls to $46.00 or below, your stop order is activated and a sell market order for 100 shares XYZ is transmitted.
-
-
-Stop orders can have Good-Till Date or Good-Till-Cancel and Day Orders parameters
-
-
-## Cancellation Order
-
-A cancellation order cancels a limit or stop order (if the stop order has not converted to a limit order, in which case it cannot be canceled).
-
-Market orders cannot be canceled because their execution will take place immediately when there is a opposite order. Canceling a market order would be non-deterministic, so this is not supported.
+See Appendix A for more details.
 
 ## Interface and API
 
@@ -86,16 +40,6 @@ Market orders cannot be canceled because their execution will take place immedia
 | Limit Order  | LO         | fok, ioc, gtc, gtd, do | Limit price      | iceberg volume (visible)  |
 | Market Order | MO         | fok, ioc               |  -               | -                         |
 | Stop Order   | SO         | gtc, gtd, do           | Activation price | -                         |
-
-# Time In Force
-
-A special instruction used when placing a trade to indicate how long an order will remain active before it is executed or expires. Time-in-force options allow traders to be more specific about the time parameters in which an order is activated.
-
-* **Day Order**: Day Orders are valid until the end of current day (midnight). If order is not executed until this time, then it is cancelled
-* **Fill or Kill (FoK)**: FoK Orders are executed always with their full volume. If full volume cannot be executed due to insufficient liquidity then order is cancelled.
-* **Good Till Cancel (GTC)**: GTC Orders don’t have a date of any expiration date.  They are valid indefinitely, but they can be cancelled at any time.
-* **Good Till Date (GTD)**: GTD Orders are valid until the date defined in this parameter. If order is not executed until this time, then it is cancelled
-* **Immediate or Cancel (IoC)**: IoC orders are executed up to the maximum  volume available in orderbook. If in order book there is insufficient liquidity to execute order fully then the remaining part is cancelled.
 
 # System Overview
 
@@ -159,7 +103,91 @@ Orders are processed in the order listed above. Cancel orders are processed firs
 * Limit orders are sorted:
   * Buy orders are sorted in descending order by their bid price and ascending order by time stamp for orders that have the same price. Orders with the highest bid (buy) price are kept at the top of the queue and will be executed first. For equal priced bids, the order that arrives first is executed first.
   * Sell orders are sorted in ascending order by their ask price, and like buy orders, by ascending order by time stamp for orders with the same price. Orders with the lowest sell (ask) prices will be sold first. For orders with the same ask price, the order that arrives first will be sold first.
-* When an order completes, either because it is filled, canceled or expires, a status message is returned to the agent that submitted the order.
+
+When an order completes, either because it is filled, canceled or expires, a status message is returned to the agent that submitted the order.
+
+## Design Considerations
+
+```ditaa
+                                                             +-------------+
+                                                     /------ | Market Book |
+/--------------\     submit order  /-------------\   |       +-------------+
+| Electronic   | ----------------> | Transaction |---/              .
+| Trading      |                   | Router      |------ ...        .
+| Network cBLK | <---------------- |             |---\              .
+\--------------/   order status    \-------------/   |       +-------------+
+                                                     \-------| Market Book |
+                                                             +-------------+
+```
+
+A client connects to the Transaction Router via a known (predefined) TCP/IP port. The Transaction Router then creates a thread to handle the transactions from that client.
+
+An instance of the matching engine is created for each stock that is traded. This matching engine processes the orders for that stock. The result of the order processing is the order book with the current bid/ask spread.
+
+
+```ditaa
++---------------------------------------+
+| Market Book                           |
+|              +---------------------+  |
+|              | Cancel Queue        |  |
+|              +---------------------+  |
+|              | Market Order Queue  |  |
+|              +---------------------+  |
+|              | Limit/Stop Order Q. |  |
+|              +---------------------+  |
+|                                       |
++---------------------------------------+
+```
+
+When the Transaction Router receives an order, it submits it to the associated queue (Market, Limit or Cancel).
+
+* The cancel queue contains the cancel requests.
+* The Market Order Queue contains queues the market orders for execution. Internally the market order queue implements a queue for buy and sell orders. A market order is at least partially filled as soon as an opposite order is present in the market. Orders are executed in first in, first executed priority.
+* The Limit Order Queue contains limit and stop orders. Internally this logical queue supports buy and sell queues for limit orders and stop orders. **When the market price point is reached for a stop order, it is converted to a market order and submitted to the market order queue**. The Limit Order Queue supports order cancellation and order expiration.
+* The Order Matching Engine matches orders from the queues following the rules outlines above. When a order is filled or canceled, the status is reported back to the market actor by entering the status in the return status queue.
+
+The “order book” consists of the orders at the heads of the queues. These orders represent the current best prices for bids and asks.
+
+## Market Protocols
+
+### **Order**
+
+1. Broker ID (a unique identifier for the market customer)
+2. Stock ID (usually the CUSIP number)
+3. Order type (buy/sell)
+4. Order class (market, limit, stop)
+5. Unit price (i.e., target price for a limit order)
+6. Number of shares (to be bought or sold)
+7. Partial fill allowed (for limit orders): 1 = partial fill allowed, 0 = no partial fill
+9. Expire time (time the order should be active in the market, in minutes)
+
+### **Acknowledgment**
+
+The order acknowledgment or an error status is returned immediately when the order is accepted. The acknowledgment is sent in response to order or cancels.
+
+1. Status (e.g., order accepted, error, etc...)
+2. Market order ID (identifier assigned by the market for this order)
+3. Timestamp (time the order was accepted)
+
+The market order ID will be the identifier that is used in reporting the order result or in order cancellation.
+
+### **Order cancel**
+
+1. Broker ID
+2. Market order ID
+
+### **Order Result**
+
+An order result is returned when an order is filled (or at least partially filled), when the order is canceled or when the order expires. Market orders (or stop orders that convert to market orders) may have more than one fill, at different prices.
+
+1. Broker ID
+2. Market order ID
+3. Timestamp
+4. Status: filled, expired, canceled
+5. Number of fills [{number of shares, fill price}]*
+
+A limit order that allows a partial fill will complete when the limit order is partially filled.
+
 
 # Services/API
 
@@ -170,6 +198,68 @@ The Matching Engine must provide access to:
 * orderbook views
 
 
+# Appendix A - Order Types
+
+
+## Limit Order
+
+A limit order is an order to buy or sell a contract at a specific price or better.
+A **buy** limit order can only be executed at the **limit price or lower**, and a **sell** limit order can only be executed at the **limit price or higher**.
+Use of a Limit order helps ensure that the customer will not receive an execution at a price less favorable than the limit price. Use of a Limit order, however, does not guarantee an execution.
+
+* A buy limit order for AAPL at $125 will buy shares of IBM at $125 or less.
+* A sell limit order for AAPL at $125 will sell shares of IBM for $125 or more.
+* A limit order must have a Time in Force (TIF) value
+
+In our system we support Limit Orders with various time in force parameters. Fill-or-Kill (FoK), Immediate-or-Cancel (IoC) works the same way as for Market Orders. Good-Till Date or Good-Till-Cancel and Day Orders are valid until specified time requested by investor and cancelled after that.
+
+### Iceberg Order
+
+
+An iceberg order is a type of order placed on a exchange. The total amount of the order is divided into a visible portion, which is reported to other market participants, and a hidden portion, which is not. When the visible part of the order is fulfilled, a new part of the hidden portion of the same size becomes visible.
+
+In our system only limit orders can be placed with Iceberg parameter.
+
+Iceberg orders generally specify an additional "display quantity"—i.e., smaller than the overall order quantity, leaving a large undisplayed quantity "below the surface"
+
+
+## Market Order
+
+A market order is an order to buy or sell a contract at the best available price.  Generally, this type of order will be executed immediately.  However, the price at which a market order will be executed is not guaranteed.  It is important for traders to remember that the last-traded price is not necessarily the price at which a market order will be executed.  In fast-moving markets, the price at which a market order will execute often deviates from the last-traded price or “real time” quote.
+
+Market Orders can have Fill-or-Kill (FoK) and Immediate or Cancel (IoC) parameters. The first one means that orders either will be filled completely or cancelled in case of insufficient liquidity. IoC order by contrast will be filled up to the existing level of liquidity and the resting part will be cancelled.
+
+## Stop Order
+
+A stop order, also referred to as a stop-loss order, is an order to buy or sell a stock once the price of the stock reaches a specified price, known as the stop price. When the stop price is reached, a stop order becomes a market order. A Stop order is not guaranteed a specific execution price and may execute significantly away from its stop price.
+
+A buy stop order is entered at a stop price above the current market price.  Investors generally use a buy stop order to limit a loss or to protect a profit on a stock that they have sold short.  
+A sell stop order is entered at a stop price below the current market price. Investors generally use a sell stop order to limit a loss or to protect a profit on a stock that they own.
+
+> You have purchased 100 shares of XYZ for $50.00/share.
+> You want to limit possible loss on this stock, so you create a stop order to sell 100 shares of XYZ with the stop price set to $46.00. If the price of your stock falls to $46.00 or below, your stop order is activated and a sell market order for 100 shares XYZ is transmitted.
+
+
+Stop orders can have Good-Till Date or Good-Till-Cancel and Day Orders parameters
+
+
+## Cancellation Order
+
+A cancellation order cancels a limit or stop order (if the stop order has not converted to a limit order, in which case it cannot be canceled).
+
+Market orders cannot be canceled because their execution will take place immediately when there is a opposite order. Canceling a market order would be non-deterministic, so this is not supported.
+
+
+# Appendix B - Time in Force
+
+
+A special instruction used when placing a trade to indicate how long an order will remain active before it is executed or expires. Time-in-force options allow traders to be more specific about the time parameters in which an order is activated.
+
+* **Day Order**: Day Orders are valid until the end of current day (midnight). If order is not executed until this time, then it is cancelled
+* **Fill or Kill (FoK)**: FoK Orders are executed always with their full volume. If full volume cannot be executed due to insufficient liquidity then order is cancelled.
+* **Good Till Cancel (GTC)**: GTC Orders don’t have a date of any expiration date.  They are valid indefinitely, but they can be cancelled at any time.
+* **Good Till Date (GTD)**: GTD Orders are valid until the date defined in this parameter. If order is not executed until this time, then it is cancelled
+* **Immediate or Cancel (IoC)**: IoC orders are executed up to the maximum  volume available in orderbook. If in order book there is insufficient liquidity to execute order fully then the remaining part is cancelled.
 
 
 # Resources

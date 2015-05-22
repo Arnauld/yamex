@@ -12,7 +12,13 @@ Feature: Limit Order
     When a sell limit order is placed for 150 FFLY at 10.4€
     Then the order book should be updated with this new order
 
-  @wip @arnauld
+  @ignore @arnauld
+  Scenario: Pass a Market order
+
+    Given an empty order book
+    When a market order is placed for 150 FFLY
+    Then the order book should be updated with this new order
+
   Scenario: Best bid price
 
     Given an empty order book
