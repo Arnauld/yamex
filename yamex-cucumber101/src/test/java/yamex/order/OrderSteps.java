@@ -25,7 +25,7 @@ public class OrderSteps {
         orderBook = new OrderBook();
     }
 
-    @Given("^the following order have been placed:$")
+    @Given("^the following orders have been placed:$")
     public void placeOrders(List<OrderRow> rows) throws Throwable {
         rows.forEach(r -> r.placeOrder(orderBook));
     }

@@ -16,7 +16,7 @@ Feature: Limit Order
   Scenario: Best bid price
 
     Given an empty order book
-    And the following order have been placed:
+    And the following orders have been placed:
       | instrument | order type  | way  | qty | price |
       | FFLY       | Limit Order | Buy  | 150 | 10.4  |
       | FFLY       | Limit Order | Buy  | 15  | 11.9  |
