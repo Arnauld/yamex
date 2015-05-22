@@ -194,7 +194,8 @@ A limit order that allows a partial fill will complete when the limit order is p
 The Matching Engine must provide access to:
 
 * the best bid/ask price and corresponding accumulated size
-* all orders that belongs to the authentified broker
+* available quantities for a given price
+* all orders that belongs to a broker
 * orderbook views
 
 
