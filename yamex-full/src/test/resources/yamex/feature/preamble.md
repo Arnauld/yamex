@@ -1,6 +1,6 @@
 # Welcome to Yamex!
 
-![](images/Yamex-header.png)
+![Yamex Logo](${imageDir}/Yamex-header.png)
 
 Yamex is the next-gen market exchange engine that will probably drives all EURO, AMER and ASIA trading platform.
 
@@ -20,3 +20,18 @@ This specification describes the matching engine expected behaviors.
 * **Ask** - the price in a sell order
 * **Spread** - the difference between the bid and the ask
 * **Time In Force** - indicates how long an order will remain active (see Appendix B)
+
+
+## Design Considerations
+
+```ditaa
+                                                             +-------------+
+                                                     /------ | Market Book |
+/--------------\     submit order  /-------------\   |       +-------------+
+| Electronic   | ----------------> | Transaction |---/              .
+| Trading      |                   | Router      |------ ...        .
+| Network cBLK | <---------------- |        cRED |---\              .
+\--------------/   order status    \-------------/   |       +-------------+
+                                                     \-------| Market Book |
+                                                             +-------------+
+```
