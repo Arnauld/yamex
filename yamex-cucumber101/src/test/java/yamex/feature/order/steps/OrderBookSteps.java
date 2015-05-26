@@ -1,13 +1,13 @@
-package yamex.order.steps;
+package yamex.feature.order.steps;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import org.assertj.core.api.Assertions;
-import yamex.order.Context;
-import yamex.order.LimitOrder;
-import yamex.order.OrderBook;
-import yamex.order.OrderConverters;
-import yamex.order.Way;
+import yamex.feature.order.Context;
+import yamex.feature.order.LimitOrder;
+import yamex.feature.order.OrderBook;
+import yamex.feature.order.OrderConverters;
+import yamex.feature.order.Way;
 
 import java.math.BigDecimal;
 import java.util.List;

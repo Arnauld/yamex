@@ -1,4 +1,4 @@
-package yamex.order;
+package yamex.feature.order;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

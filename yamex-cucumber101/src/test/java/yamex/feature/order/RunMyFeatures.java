@@ -1,4 +1,4 @@
-package yamex.order;
+package yamex.feature.order;
 
 import cucumber.api.CucumberOptions;
 import cucumber.api.junit.Cucumber;

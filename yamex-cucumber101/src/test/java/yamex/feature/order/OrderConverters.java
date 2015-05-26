@@ -1,4 +1,4 @@
-package yamex.order;
+package yamex.feature.order;
 
 import org.assertj.core.api.Assertions;
 
