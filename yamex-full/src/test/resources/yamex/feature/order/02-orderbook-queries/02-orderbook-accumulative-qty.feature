@@ -1,5 +1,6 @@
 Feature: Order Book Accumulative Quantities
 
+  @orderBook @cumulativeView @limitOrder
   Scenario: Cumulative Totals of Bids and Offers
 
     Given an empty order book

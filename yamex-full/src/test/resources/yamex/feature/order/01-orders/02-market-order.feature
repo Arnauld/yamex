@@ -12,12 +12,14 @@ Feature: Market Order
 #  insufficient liquidity. IoC order by contrast will be filled up to the existing level of
 #  liquidity and the resting part will be cancelled.
 
+  @marketOrder @placeOrder
   Scenario: Pass a Sell Market order
 
     Given an empty order book
     When a market order is placed to sell 150 FFLY
     Then the order book should be updated with this new order
 
+  @marketOrder @placeOrder
   Scenario: Pass a Buy Market order
 
     Given an empty order book

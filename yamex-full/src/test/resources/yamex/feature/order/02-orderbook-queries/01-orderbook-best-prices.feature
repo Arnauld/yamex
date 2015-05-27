@@ -8,6 +8,7 @@ Feature: Order Book Best Prices
 #* **Bid** - the price in a buy order
 #* **Ask** - the price in a sell order
 
+  @default @orderBook @bestPrices
   Scenario: Best bid price - limit orders only
 
     Given an empty order book
@@ -18,7 +19,7 @@ Feature: Order Book Best Prices
       | FFLY       | Limit Order | Sell | 15  | 12.9  |
     Then the order book's best bid price should be 11.9€
 
-
+  @orderBook @bestPrices
   Scenario: Best bid price - limit orders and market orders
 
     Given an empty order book
@@ -30,7 +31,7 @@ Feature: Order Book Best Prices
       | FFLY       | Limit Order  | Sell | 15  | 12.9  |
     Then the order book's best bid price should be 11.9€
 
-
+  @orderBook @bestPrices @limitOrder
   Scenario: Best ask price - limit orders only
 
     Given an empty order book
@@ -41,7 +42,7 @@ Feature: Order Book Best Prices
       | FFLY       | Limit Order | Buy  | 15  | 10.1  |
     Then the order book's best ask price should be 10.4€
 
-
+  @orderBook @bestPrices @limitOrder
   Scenario: Best ask price - limit orders and market orders
 
     Given an empty order book
@@ -53,7 +54,7 @@ Feature: Order Book Best Prices
       | FFLY       | Limit Order  | Buy  | 15  | 12.9  |
     Then the order book's best ask price should be 10.4€
 
-
+  @orderBook @bestPrices @limitOrder @stopOrder
   Scenario: Best ask price - limit orders and stop orders
 
     #  Stop order should not be taken into account for best price.

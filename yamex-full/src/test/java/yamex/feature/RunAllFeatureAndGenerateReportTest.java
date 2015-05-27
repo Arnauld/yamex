@@ -34,7 +34,7 @@ import static tzatziki.pdf.support.DefaultPdfReportBuilder.Overview.TagViews;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({RunAllFeatures.class})
-public class RunAllFeatureAndGenerateReportSuite {
+public class RunAllFeatureAndGenerateReportTest {
 
     @AfterClass
     public static void generateExecutionReport() throws Exception {
@@ -45,8 +45,8 @@ public class RunAllFeatureAndGenerateReportSuite {
 
         new DefaultPdfReportBuilder()
                 .using(new Configuration()
-                                .displayFeatureTags(false)
-                                .displayScenarioTags(false)
+                                .displayFeatureTags(true)
+                                .displayScenarioTags(true)
                                 .declareProperty("imageDir",
                                         new File(baseDir(), "/src/test/resources/yamex/feature/images").toURI().toString())
                                 .adjustFont(Styles.TABLE_HEADER_FONT, new FontModifier().size(10.0f))
@@ -57,13 +57,10 @@ public class RunAllFeatureAndGenerateReportSuite {
                 .overview(TagViews)
                 .features(execs)
                 .tagDictionary(tagDictionary)
-                .tagViewsFromDictionary(new TagViewsFromDictionaryBuilder()
-                                .tagFilter(excludeWip())
-                )
+                .tagViewsFromDictionary(new TagViewsFromDictionaryBuilder().tagFilter(excludeWip()))
                 .tagViews(
-                        new TagView("Orders (non wip)", TagFilter.from("~@wip", "@order")),
-                        new TagView("Non wip about tea", TagFilter.from("~@wip", "@tea")),
-                        new TagView("WIP - Work in progress", TagFilter.from("@wip,@wip1,@wip2"))
+                        new TagView("Orders (non wip)", TagFilter.from("~@wip", "@limitOrder,@marketOrder,@stopOrder")),
+                        new TagView("Matching Principles", TagFilter.from("~@wip", "@matchingPrinciple"))
                 )
                 .sampleSteps()
                 .generate(fileOut);

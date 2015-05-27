@@ -16,6 +16,7 @@ Feature: Matching Principles for limit orders
 # opening or closing auction. Orders going into the order book are always matched at the appropriate
 # prices available in the order book, up to the specified limit price.
 
+  @orderBook @matchingPrinciple @limitOrder
   Scenario: Matching a Buy order partially - exact same price
 
     Given an empty order book
@@ -34,6 +35,7 @@ Feature: Matching Principles for limit orders
       | B1            | Broker-A     | 15  | 10.4  |
 
 
+  @orderBook @matchingPrinciple @limitOrder
   Scenario: Matching a Buy order partially - higher buy price
 
     # In the case of limit orders, orders with the best possible prices:
@@ -61,6 +63,7 @@ Feature: Matching Principles for limit orders
       | B1            | Broker-A     | 15  | 11.4  |
 
 
+  @orderBook @matchingPrinciple @limitOrder
   Scenario: Matching a Sell order partially - exact same price
 
     Given an empty order book
@@ -79,6 +82,7 @@ Feature: Matching Principles for limit orders
       | Broker-A      | B2           | 15  | 11.9  |
 
 
+  @orderBook @matchingPrinciple @limitOrder
   Scenario: Matching a Sell order against multiple Buy orders - higher buy price fulfilled first
 
     # Orders may not necessarily be executed at a single price, but may generate several
@@ -110,6 +114,7 @@ Feature: Matching Principles for limit orders
       | Broker-A      | B2           | 5   | 11.9  |
 
 
+  @orderBook @matchingPrinciple @limitOrder
   Scenario: Matching a Sell order against multiple Buy orders - buys fulfilled in fifo
 
     # When an order (or quote) is entered into the order book, it is assigned a timestamp.

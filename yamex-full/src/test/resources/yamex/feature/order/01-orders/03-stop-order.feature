@@ -13,18 +13,21 @@ Feature: Stop Order
 #  Investors generally use a sell stop order to limit a loss or to protect a profit on a stock
 #  that they own.
 
+  @stopOrder @placeOrder
   Scenario: Place a Buy stop order
 
     Given an empty order book
     When a stop order is placed to buy 150 FFLY at 10.4€
     Then the order book should be updated with this new order
 
+  @stopOrder @placeOrder
   Scenario: Place a Sell stop order
 
     Given an empty order book
     When a stop order is placed to sell 150 FFLY at 10.4€
     Then the order book should be updated with this new order
 
+  @stopOrder @placeOrder
   @notImplemented
   Scenario: Buy stop order becomes a Market Order
 

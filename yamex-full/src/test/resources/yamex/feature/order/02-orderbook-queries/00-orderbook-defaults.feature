@@ -1,7 +1,7 @@
 Feature: Default order placed
 
 
-  @default
+  @default @orderBook
   Scenario: Default Order
 
     Given an empty order book
