@@ -54,14 +54,14 @@ public class RunAllFeatureAndGenerateReportSuite {
                 .title("Yamex")
                 .subTitle("Technical & Functional specifications")
                 .markup(Markdown.fromUTF8Resource("/yamex/feature/preamble.md"))
-                .overview(FeatureSummary, TagViews)
+                .overview(TagViews)
                 .features(execs)
                 .tagDictionary(tagDictionary)
                 .tagViewsFromDictionary(new TagViewsFromDictionaryBuilder()
                                 .tagFilter(excludeWip())
                 )
                 .tagViews(
-                        new TagView("Payment (non wip)", TagFilter.from("~@wip", "@payment")),
+                        new TagView("Orders (non wip)", TagFilter.from("~@wip", "@order")),
                         new TagView("Non wip about tea", TagFilter.from("~@wip", "@tea")),
                         new TagView("WIP - Work in progress", TagFilter.from("@wip,@wip1,@wip2"))
                 )

@@ -18,19 +18,21 @@ Feature: Limit Order
 #  Good-Till Date or Good-Till-Cancel and Day Orders are valid until specified time
 #  requested by investor and cancelled after that.
 
+  @limitOrder @placeOrder
   Scenario: Place a Buy Limit Order
 
     Given an empty order book
     When a limit order is placed to buy 150 FFLY at 10.4€
     Then the order book should be updated with this new order
 
+  @limitOrder @placeOrder
   Scenario: Place a Sell Limit Order
 
     Given an empty order book
     When a limit order is placed to sell 150 FFLY at 10.4€
     Then the order book should be updated with this new order
 
-  @default
+  @default @limitOrder
   Scenario: Default Sell Limit Order
 
     Given a default limit order to sell
@@ -38,7 +40,7 @@ Feature: Limit Order
       | order type  | way  | instrument | qty | price | time in force |
       | Limit Order | Sell | FFLY       | 100 | 10.1  | none          |
 
-  @notImplemented
+  @notImplemented @limitOrder @timeInForce
   Scenario Outline: Time in Force - Accepted parameter
 
     When one try to place a default limit order with the following specifics:

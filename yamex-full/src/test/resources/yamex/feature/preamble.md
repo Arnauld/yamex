@@ -36,8 +36,21 @@ This specification describes the matching engine expected behaviors.
                                                              +-------------+
 ```
 
+### Price/Time Algorithm
+
+Under the Price/Time algorithm, an incoming trade is matched with the first orders (at the best price), which is the so called FIFO method.
+More precisely: suppose `n` limit orders `Q1` ... `Qn` of a cumulative volume `Q` lots, and an incoming trade of `N <= Q` lots.
+
+Then there exists an index `1 <= j <= n` such that:
+
 ```formula
-\Re{z} =\frac{n\pi \dfrac{\theta +\psi}{2}}{
-            \left(\dfrac{\theta +\psi}{2}\right)^2 + \left( \dfrac{1}{2}
-            \log \left\vert\dfrac{B}{A}\right\vert\right)^2}.
+\sum\limits_{i=1}^j Q_i \leq N
 ```
+
+and
+
+```formula
+\sum\limits_{i=1}^{min(j+1,n)} Q_i \geq N
+```
+
+Under the Price/Time algorithm, the first `j` limit orders are filled in full, and the remaining lots are assigned to the `(j+1)`-th limit order (if `j<n`)
