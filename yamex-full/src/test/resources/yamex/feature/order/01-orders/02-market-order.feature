@@ -13,14 +13,14 @@ Feature: Market Order
 #  liquidity and the resting part will be cancelled.
 
   @marketOrder @placeOrder
-  Scenario: Pass a Sell Market order
+  Scenario: Place a Sell Market order
 
     Given an empty order book
     When a market order is placed to sell 150 FFLY
     Then the order book should be updated with this new order
 
   @marketOrder @placeOrder
-  Scenario: Pass a Buy Market order
+  Scenario: Place a Buy Market order
 
     Given an empty order book
     When a market order is placed to buy 150 FFLY

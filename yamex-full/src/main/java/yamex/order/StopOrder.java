@@ -58,4 +58,9 @@ public class StopOrder implements Order {
     public MarketOrder asMarketOrder() {
         return new MarketOrder(brokerId, instrument, way, qty);
     }
+
+    @Override
+    public String toString() {
+        return "StopOrder{" + brokerId + ", " + instrument + ": " + way + " " + qty + "@" + priceLimit;
+    }
 }

@@ -57,7 +57,9 @@ Feature: Order Book Best Prices
   @orderBook @bestPrices @limitOrder @stopOrder
   Scenario: Best ask price - limit orders and stop orders
 
-    #  Stop order should not be taken into account for best price.
+    #{icon=warning, icon-color=dark-red}
+    #G>  Stop order should not be taken into account for best price.
+    #
 
     Given an empty order book
     And the following orders have been placed:

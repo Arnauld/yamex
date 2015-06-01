@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <cucumber.version>1.2.2</cucumber.version>
-        <tzatziki.version>0.12.1</tzatziki.version>
+        <tzatziki.version>0.12.2-SNAPSHOT</tzatziki.version>
     </properties>
 
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

@@ -123,7 +123,7 @@ public class OrderBookBasic implements OrderBook {
             records = Stream.concat(
                     marketRecords.stream()
                             .filter(otherWithRemaining)
-                            .map(or -> new LR(or.orderId, or.order, or.remainingQuantity(), marketPrice)),
+                            .map(or -> new LR(or, marketPrice)),
                     records);
         }
 
@@ -297,6 +297,7 @@ public class OrderBookBasic implements OrderBook {
     }
 
     public static class R implements Record {
+        private final R delegate;
         private final OrderId orderId;
         private final Order order;
         private int remainingQty;
@@ -306,9 +307,17 @@ public class OrderBookBasic implements OrderBook {
         }
 
         public R(OrderId orderId, Order order, int remainingQty) {
+            this.delegate = null;
             this.orderId = orderId;
             this.order = order;
             this.remainingQty = remainingQty;
+        }
+
+        public R(R delegate) {
+            this.delegate = delegate;
+            this.orderId = delegate.orderId;
+            this.order = delegate.order;
+            this.remainingQty = delegate.remainingQuantity();
         }
 
         @Override
@@ -335,12 +344,13 @@ public class OrderBookBasic implements OrderBook {
         }
 
         protected void decreaseQuantity(int transferable, Optional<OrderBookListener> listener) {
-            remainingQty -= transferable;
-
-            listener.map(l -> {
-                l.orderConsumed(orderId(), order(), transferable, remainingQty);
-                return true;
-            });
+            if (delegate != null) {
+                delegate.decreaseQuantity(transferable, listener);
+            } else {
+                remainingQty -= transferable;
+                if (listener.isPresent())
+                    listener.get().orderConsumed(orderId(), order(), transferable, remainingQty);
+            }
         }
 
         public boolean cancelled() {
@@ -361,6 +371,11 @@ public class OrderBookBasic implements OrderBook {
 
         public LR(OrderId orderId, Order order, int remainingQty, BigDecimal price) {
             super(orderId, order, remainingQty);
+            this.price = price;
+        }
+
+        public LR(R or, BigDecimal price) {
+            super(or);
             this.price = price;
         }
 
@@ -394,7 +409,7 @@ public class OrderBookBasic implements OrderBook {
         }
 
         public void consumeQty() {
-            decreaseQuantity(remainingQuantity(), null);
+            decreaseQuantity(remainingQuantity(), Optional.empty());
         }
 
         @Override

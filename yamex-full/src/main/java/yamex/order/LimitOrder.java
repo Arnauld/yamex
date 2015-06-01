@@ -54,4 +54,9 @@ public class LimitOrder implements Order {
     public BigDecimal priceLimit() {
         return priceLimit;
     }
+
+    @Override
+    public String toString() {
+        return "LimitOrder{" + brokerId + ", " + instrument + ": " + way + " " + qty + "@" + priceLimit + "}";
+    }
 }

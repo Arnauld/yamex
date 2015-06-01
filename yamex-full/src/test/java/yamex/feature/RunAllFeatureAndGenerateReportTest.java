@@ -1,6 +1,9 @@
 package yamex.feature;
 
 import com.google.common.base.Predicate;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Font;
+import gutenberg.itext.FontCopier;
 import gutenberg.itext.FontModifier;
 import gutenberg.itext.Styles;
 import gutenberg.itext.model.Markdown;
@@ -15,8 +18,10 @@ import tzatziki.analysis.exec.tag.TagFilter;
 import tzatziki.analysis.tag.Tag;
 import tzatziki.analysis.tag.TagDictionary;
 import tzatziki.analysis.tag.TagDictionaryLoader;
+import tzatziki.pdf.emitter.StepsEmitter;
 import tzatziki.pdf.support.Configuration;
 import tzatziki.pdf.support.DefaultPdfReportBuilder;
+import tzatziki.pdf.support.StylesPostProcessor;
 import tzatziki.pdf.support.TagViewsFromDictionaryBuilder;
 import yamex.TestSettings;
 
@@ -26,7 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static tzatziki.pdf.support.DefaultPdfReportBuilder.Overview.FeatureSummary;
+import static gutenberg.itext.Colors.DARK_RED;
+import static tzatziki.pdf.Settings.EMPHASIZE_COLOR;
 import static tzatziki.pdf.support.DefaultPdfReportBuilder.Overview.TagViews;
 
 /**
@@ -50,6 +56,7 @@ public class RunAllFeatureAndGenerateReportTest {
                                 .declareProperty("imageDir",
                                         new File(baseDir(), "/src/test/resources/yamex/feature/images").toURI().toString())
                                 .adjustFont(Styles.TABLE_HEADER_FONT, new FontModifier().size(10.0f))
+                                .stylesPostProcessor(adjustStyles())
                 )
                 .title("Yamex")
                 .subTitle("Technical & Functional specifications")
@@ -64,6 +71,17 @@ public class RunAllFeatureAndGenerateReportTest {
                 )
                 .sampleSteps()
                 .generate(fileOut);
+    }
+
+    private static StylesPostProcessor adjustStyles() {
+        return (styles) -> {
+            Font defaultFont = styles.defaultFont();
+            BaseColor emphasizedColor = styles.getColor(EMPHASIZE_COLOR).or(DARK_RED);
+
+            styles.registerFont(StepsEmitter.STEP_KEYWORD_FONT, new FontCopier(defaultFont).color(emphasizedColor).get());
+            styles.registerFont(StepsEmitter.STEP_PHRASE_FONT, defaultFont);
+            styles.registerFont(StepsEmitter.STEP_PARAMETER_FONT, new FontCopier(defaultFont).color(emphasizedColor).get());
+        };
     }
 
     private static Predicate<Tag> excludeWip() {

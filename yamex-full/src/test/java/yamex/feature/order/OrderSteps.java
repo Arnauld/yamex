@@ -7,14 +7,18 @@ import cucumber.api.java.en.When;
 import yamex.BrokerId;
 import yamex.OrderId;
 import yamex.feature.Context;
-import yamex.order.LimitOrder;
-import yamex.order.MarketOrder;
-import yamex.order.Order;
-import yamex.order.StopOrder;
+import yamex.order.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author <a href="http://twitter.com/aloyer">@aloyer</a>
@@ -61,7 +65,16 @@ public class OrderSteps {
 
     @When("^a market order is placed to (buy|sell) (\\d+) (\\S+)$")
     public void placeMarketOrder(String way, int qty, String instrument) throws Throwable {
-        MarketOrder order = new MarketOrder(context.currentBrokerId(), instrument, OrderConverters.parseWay(way), qty);
+        placeMarketOrder(way, qty, instrument, context.currentBrokerId());
+    }
+
+    @When("^a market order is placed to (buy|sell) (\\d+) (\\S+) by \"([^\"]+)\"$")
+    public void placeMarketOrder(String way, int qty, String instrument, String brokerId) throws Throwable {
+        placeMarketOrder(way, qty, instrument, new BrokerId(brokerId));
+    }
+
+    public void placeMarketOrder(String way, int qty, String instrument, BrokerId brokerId) throws Throwable {
+        MarketOrder order = new MarketOrder(brokerId, instrument, OrderConverters.parseWay(way), qty);
         OrderId id = getOrderBook().placeOrder(order);
         context.setCurrentOrder(id, order);
     }
@@ -92,19 +105,13 @@ public class OrderSteps {
         context.setCurrentOrder(id, order);
     }
 
-
     @Then("^the order should have the following properties:$")
     public void the_order_should_have_the_following_properties(DataTable expectedTable) throws Throwable {
         Order currentOrder = context.getCurrentOrder();
         OrderProto orderProto = OrderProto.from(currentOrder);
 
-        System.err.println("OrderSteps.the_order_should_have_the_following_properties::" + orderProto);
-
         List<OrderProto> actuals = Arrays.asList(orderProto);
-
-        //DataTable actualTable = DataTable.create(actuals);
-        //List<OrderProto> expected = expectedTable.asList(OrderProto.class);
-
         expectedTable.unorderedDiff(actuals);
     }
+
 }

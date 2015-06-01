@@ -1,5 +1,13 @@
 Feature: Order Book Accumulative Quantities
 
+  Spreading information : Share market collects every type of information in respect of
+  the listed companies. Generally, this information is published or in case of need
+  anybody can get it from the stock exchange free of any cost.
+  In this way, the stock exchange guides the investors by providing various types of
+  information. Consequently, the number of shareholders in companies is increasing
+  continuously. Thus, the stock exchanges are playing a vital role in ensuring wider
+  share ownership.
+
   @orderBook @cumulativeView @limitOrder
   Scenario: Cumulative Totals of Bids and Offers
 

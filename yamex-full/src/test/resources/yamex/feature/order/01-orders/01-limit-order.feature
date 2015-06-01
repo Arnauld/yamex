@@ -9,14 +9,15 @@ Feature: Limit Order
 #  at a price less favorable than the limit price. Use of a Limit order, however,
 #  does not guarantee an execution.
 #
-#  * A buy limit order for AAPL at $125 will buy shares of IBM at $125 or less.
-#  * A sell limit order for AAPL at $125 will sell shares of IBM for $125 or more.
+#  * A buy limit order for FFLY at $125 will buy shares of FFLY at $125 or less.
+#  * A sell limit order for FFLY at $125 will sell shares of FFLY for $125 or more.
 #  * A limit order must have a Time in Force (TIF) value
 #
-#  In our system we support Limit Orders with various time in force parameters.
-#  Fill-or-Kill (FoK), Immediate-or-Cancel (IoC) works the same way as for Market Orders.
-#  Good-Till Date or Good-Till-Cancel and Day Orders are valid until specified time
-#  requested by investor and cancelled after that.
+#{icon=info-circle, icon-color=#00b200}
+#G> In our system we support Limit Orders with various time in force parameters.
+#G> Fill-or-Kill (FoK), Immediate-or-Cancel (IoC) works the same way as for Market Orders.
+#G> Good-Till Date or Good-Till-Cancel and Day Orders are valid until specified time
+#G> requested by investor and cancelled after that.
 
   @limitOrder @placeOrder
   Scenario: Place a Buy Limit Order

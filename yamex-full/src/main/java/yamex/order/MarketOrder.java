@@ -46,4 +46,8 @@ public class MarketOrder implements Order {
         return way;
     }
 
+    @Override
+    public String toString() {
+        return "MarketOrder{" + brokerId + ", " + instrument + ": " + way + " " + qty;
+    }
 }

@@ -19,6 +19,23 @@ Feature: Matching Principles for limit orders
   @orderBook @matchingPrinciple @limitOrder
   Scenario: Matching a Buy order partially - exact same price
 
+    #
+    # Order book contains already two sell orders.
+    #
+    # The buy order triggered is not fully fulfilled, thus remains in the order book but with only the missing quantity.
+    #
+    # But an execution is triggered for the partial fulfillment
+    #
+    # **Alternate scenario?**
+    #
+    #{width:100%}
+    #```cucumber
+    #  Given an order book containing two sell orders: 15@10.4 by B1 and 150@11.9 by B2
+    #  When a buy order is placed 20@10.4 by BBuyer
+    #  Then the buy order should remain in the order book with the remaining quantity of 5@10.4
+    #  But an execution should have been triggered: [B1->BBuyer 15@10.4]
+    #```
+
     Given an empty order book
     And the following orders have been placed:
       | Broker | order type  | way  | qty | price |

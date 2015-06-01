@@ -6,13 +6,13 @@ import yamex.order.Execution;
 import yamex.order.ExecutionBus;
 import yamex.order.Order;
 import yamex.order.OrderBook;
-import yamex.order.OrderBookListener;
 import yamex.order.memory.OrderBookBasic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -31,6 +31,7 @@ public class Context {
     //
     private ExecutionBus executionBus;
     private final List<Execution> executions = new ArrayList<>();
+    private Random random;
 
     public void setOrderBook(OrderBook orderBook) {
         this.orderBook = orderBook;
@@ -80,11 +81,28 @@ public class Context {
         AtomicLong idGen = new AtomicLong();
         Supplier<OrderId> orderIdGen = () -> new OrderId("#" + idGen.incrementAndGet());
 
-        setOrderBook(new OrderBookBasic(orderIdGen, getExecutionBus(), OrderBookListener.SOUT));
+        setOrderBook(new OrderBookBasic(orderIdGen, getExecutionBus(), new OrderBookListenerLogger()));
     }
 
     public Defaults getDefaults() {
         return defaults;
     }
 
+    public Random getRandom() {
+        if (random == null)
+            random = new Random(42L);
+        return random;
+    }
+
+    public void setRandom(Random random) {
+        this.random = random;
+    }
+
+    public void put(Object key, Object value) {
+        data.put(key, value);
+    }
+
+    public <T> T get(Class<T> type, Object key) {
+        return type.cast(data.get(key));
+    }
 }

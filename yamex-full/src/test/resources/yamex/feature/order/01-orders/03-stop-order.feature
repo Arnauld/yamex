@@ -6,7 +6,7 @@ Feature: Stop Order
 #  execution price and may execute significantly away from its stop price.
 #
 #  A buy stop order is entered at a stop price above the current market price.
-#  Investors generally use a buy stop order to limit a loss or to protect a profit on a stock
+#  Investors **generally use a buy stop order to limit a loss or to protect a profit** on a stock
 #  that they have sold short.
 #
 #  A sell stop order is entered at a stop price below the current market price.
