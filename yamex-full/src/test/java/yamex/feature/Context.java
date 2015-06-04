@@ -2,6 +2,8 @@ package yamex.feature;
 
 import yamex.BrokerId;
 import yamex.OrderId;
+import yamex.fixprotocol.FieldDictionary;
+import yamex.fixprotocol.FixProtocol;
 import yamex.order.Execution;
 import yamex.order.ExecutionBus;
 import yamex.order.Order;
@@ -32,6 +34,8 @@ public class Context {
     private ExecutionBus executionBus;
     private final List<Execution> executions = new ArrayList<>();
     private Random random;
+    private FixProtocol fixProtocol;
+    private FieldDictionary fieldDictionary;
 
     public void setOrderBook(OrderBook orderBook) {
         this.orderBook = orderBook;
@@ -104,5 +108,19 @@ public class Context {
 
     public <T> T get(Class<T> type, Object key) {
         return type.cast(data.get(key));
+    }
+
+    public FixProtocol getFixProtocol() {
+        if (fixProtocol == null)
+            fixProtocol = new FixProtocol();
+        return fixProtocol;
+    }
+
+    public FieldDictionary getFieldDictionary() {
+        if(fieldDictionary == null) {
+            fieldDictionary = new FieldDictionary();
+            fieldDictionary.registerDefaults();
+        }
+        return fieldDictionary;
     }
 }
