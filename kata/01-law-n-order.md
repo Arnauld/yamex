@@ -7,9 +7,9 @@ All orders are created by brokers, are either to sell or to buy a given instrume
 
 > A customer enters the quantity and prices of the orders and clicks “buy” or “sell”
 
-![Take Order](images/Order-controls.png)
+![Take Order](../images/Order-controls.png)
 
-![My Order list](images/All-orders.png)
+![My Order list](../images/All-orders.png)
 
 
 * buy/bid
